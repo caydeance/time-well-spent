@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_sessionEntry"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     tools:context=".SessionListActivity">
 
     <TextView
@@ -35,27 +35,28 @@
         android:layout_marginEnd="8dp"
         android:textAlignment="textEnd"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/textView_sessionEntry_timeSpent"
         app:layout_constraintTop_toBottomOf="@+id/textView_sessionEntry_name"
         tools:text="70 BPM" />
 
     <TextView
         android:id="@+id/textView_sessionEntry_timeSpent"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="8dp"
+        app:layout_constraintEnd_toStartOf="@+id/textView_sessionEntry_bpm"
         app:layout_constraintStart_toEndOf="@+id/textView_sessionEntry_date"
         app:layout_constraintTop_toBottomOf="@+id/textView_sessionEntry_name"
         tools:text="0.5 hours" />
 
     <TextView
         android:id="@+id/textView_sessionEntry_emotion"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="@+id/textView_sessionEntry_name"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/textView_sessionEntry_name"
+        app:layout_constraintTop_toTopOf="parent"
         tools:text="&#128512; " />
 </androidx.constraintlayout.widget.ConstraintLayout>

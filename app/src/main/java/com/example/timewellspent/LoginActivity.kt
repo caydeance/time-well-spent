@@ -69,6 +69,7 @@ class LoginActivity : AppCompatActivity() {
                 object : AsyncCallback<BackendlessUser?> {
                     override fun handleResponse(user: BackendlessUser?) {
                         Log.d(TAG, "handleResponse: ${user?.getProperty("username")}")
+                        startActivity(sessionListIntent)
                     }
 
                     override fun handleFault(fault: BackendlessFault?) {
