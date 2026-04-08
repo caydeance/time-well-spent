@@ -37,13 +37,6 @@ class SessionListActivity : AppCompatActivity() {
         }
         Log.d(TAG, "ONCREATE: WE HERE RN")
 //        val queryBuilder = DataQueryBuilder.create()
-
-
-
-
-
-
-
     }
 
     override fun onStart() {
@@ -64,12 +57,7 @@ class SessionListActivity : AppCompatActivity() {
 
                 queryBuilder.setWhereClause(whereClause)
                 Log.d(TAG, "QUERYBUILDER SET: ${queryBuilder}")
-//                  val sessionList = SessionAdapter(object)
-//                  val recyclerView = binding.recyclerViewSessionListRecyclerView
-//                  recyclerView.layoutManager = LinearLayoutManager(this)
-//                  recyclerView.adapter = sessionList
 
-//                Log.d(TAG, "FINDING FILTERED SESSIONS: ${result}")
                 Backendless.Data.of<Session>(Session::class.java).find(
                     queryBuilder,
                     object : AsyncCallback<MutableList<Session>> {
@@ -88,6 +76,7 @@ class SessionListActivity : AppCompatActivity() {
 
                         override fun handleFault(fault: BackendlessFault?) {
                             // an error has occurred, the error code can be retrieved with fault.getCode()
+                            Log.d(TAG, "myfaultbro:( ${fault?.code}")
                         }
                     })
 
@@ -96,6 +85,7 @@ class SessionListActivity : AppCompatActivity() {
 
             override fun handleFault(fault: BackendlessFault?) {
                 // error handling logic
+                Log.d(TAG, "myfaultbro:( ${fault?.code}")
             }
         })
 
