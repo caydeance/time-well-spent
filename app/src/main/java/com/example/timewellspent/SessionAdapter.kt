@@ -9,15 +9,17 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.app.ActivityCompat.recreate
 import androidx.recyclerview.widget.RecyclerView
 import com.backendless.Backendless
 import com.backendless.async.callback.AsyncCallback
 import com.backendless.exceptions.BackendlessFault
 
 
-class SessionAdapter(var sessionList: List<Session>) : RecyclerView.Adapter<SessionAdapter.ViewHolder>() {
+class SessionAdapter(var sessionList: MutableList<Session>) : RecyclerView.Adapter<SessionAdapter.ViewHolder>() {
 
     companion object{
+        val TAG = "session_adapter"
         val EXTRA_SESSION = "session"
     }
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -40,6 +42,7 @@ class SessionAdapter(var sessionList: List<Session>) : RecyclerView.Adapter<Sess
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        Log.d(TAG, "onCreateViewHolder()")
         val view =
             LayoutInflater.from(parent.context).inflate(R.layout.item_session, parent, false)
         val holder = ViewHolder(view)
@@ -47,12 +50,17 @@ class SessionAdapter(var sessionList: List<Session>) : RecyclerView.Adapter<Sess
     }
 
     override fun getItemCount(): Int {
+        Log.d(TAG, "getItemCount(): ${sessionList.size}")
         return sessionList.size
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        Log.d(TAG, "onBindViewHolder()")
+
         val session = sessionList[position]
         val context = holder.layout.context
+
+        Log.d(TAG, "CURRENT SESSION BEING FORMATTED IN ONBINDVIEWHOLDER(): ${session}")
 
         holder.textViewName.text = session.name
 
@@ -110,6 +118,7 @@ class SessionAdapter(var sessionList: List<Session>) : RecyclerView.Adapter<Sess
         }
 
         holder.layout.setOnClickListener {
+            Log.d(TAG, "layout.setOnClickListener()")
             val intent = Intent(context, Session::class.java)
             // add the hero to the extras of the intent
             Toast.makeText(context, "SessionAdapter activatedddd", Toast.LENGTH_SHORT).show()
@@ -122,38 +131,51 @@ class SessionAdapter(var sessionList: List<Session>) : RecyclerView.Adapter<Sess
     }
 
     private fun deleteFromBackendless(position: Int) {
+        Log.d(TAG, "deleteFromBackendless()")
         Log.d("SessionAdapter", "deleteFromBackendless: Trying to delete ${sessionList[position]}")
-        val session: Session = Session()
+//        val sessionToDelete = Session()
+//        val currSession = sessionList[position]
+//
+//        sessionToDelete.name = currSession.name
+//        sessionToDelete.elapsedTime = currSession.elapsedTime
+//        sessionToDelete.emotion = currSession.emotion
+//        sessionToDelete.heartRate = currSession.heartRate
+//        sessionToDelete.date = currSession.date
 
-//        session.name = sessionList[position].name
-//        session.name = "TEST NAME"
-//        session.elapsedTime = 0
-//        session.emotion = "NEUTRAL"
-//        session.heartRate = 0
-//        session.sessionDate = "03/25/2027"
-        Backendless.Data.of<Session>(Session::class.java)
-            .save(sessionList[position], object : AsyncCallback<Session> {
-                override fun handleResponse(savedContact: Session) {
-                    Backendless.Data.of<Session>(Session::class.java).remove(
-                        savedContact,
-                        object : AsyncCallback<Long?> {
-                            override fun handleResponse(response: Long?) {
-                                // Contact has been deleted. The response is the
-                                // time in milliseconds when the object was deleted
-                                sessionList.removeAt(position)
-                            }
+        Backendless.Data.of<Session>(Session::class.java).remove(
+            sessionList[position],
+            object : AsyncCallback<Long?> {
+                override fun handleResponse(response: Long?) {
 
-                            override fun handleFault(fault: BackendlessFault?) {
-                                // an error has occurred, the error code can be
-                                // retrieved with fault.getCode()
-                            }
-                        })
+                    Log.d(TAG, "deleteFromBackendless(), innermost handleResponse()")
+                    // Contact has been deleted. The response is the
+                    // time in milliseconds when the object was deleted
+                    notifyItemRemoved(position)
+                    notifyItemRangeChanged(position, sessionList.size)
+
+                    Log.d(TAG, "REMOVED SESSION: ${sessionList[position]})" + "\n at position: ${position}")
+                    sessionList.removeAt(position)
                 }
 
                 override fun handleFault(fault: BackendlessFault?) {
-                    // an error has occurred, the error code can be retrieved with fault.getCode()
+                    // an error has occurred, the error code can be
+                    // retrieved with fault.getCode()
+                    Log.d(TAG, "myfaultbro:( ${fault?.code}")
                 }
             })
+
+//        Log.d(TAG, "session: ${sessionList[position]}")
+//        Backendless.Data.of<Session>(Session::class.java)
+//            .save(sessionList[position], object : AsyncCallback<Session> {
+//                override fun handleResponse(savedContact: Session) {
+//
+//                }
+//
+//                override fun handleFault(fault: BackendlessFault?) {
+//                    // an error has occurred, the error code can be retrieved with fault.getCode()
+//                    Log.d(TAG, "myfaultbro:( ${fault?.code}")
+//                }
+//            })
         // put in the code to delete the item using the callback from Backendless
         // in the handleResponse, we'll need to also delete the item from the sessionList
         //(will need to update the variable to make it mutable)

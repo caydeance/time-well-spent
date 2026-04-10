@@ -7,5 +7,6 @@
     <string name="register">Register</string>
     <string name="name">Name</string>
     <string name="confirm_password">Confirm Password</string>
+    <string name="delete">Delete</string>
     <string name="email">Email</string>
 </resources>
