@@ -9,18 +9,20 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.app.ActivityCompat.recreate
 import androidx.recyclerview.widget.RecyclerView
 import com.backendless.Backendless
 import com.backendless.async.callback.AsyncCallback
 import com.backendless.exceptions.BackendlessFault
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 
 class SessionAdapter(var sessionList: MutableList<Session>) : RecyclerView.Adapter<SessionAdapter.ViewHolder>() {
 
     companion object{
         val TAG = "session_adapter"
-        val EXTRA_SESSION = "session"
+        val EXTRA_SESSION_ENTRY = "session_entry"
     }
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val textViewName: TextView
@@ -57,44 +59,46 @@ class SessionAdapter(var sessionList: MutableList<Session>) : RecyclerView.Adapt
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         Log.d(TAG, "onBindViewHolder()")
 
-        val session = sessionList[position]
+        val sessionEntry = sessionList[position]
         val context = holder.layout.context
 
-        Log.d(TAG, "CURRENT SESSION BEING FORMATTED IN ONBINDVIEWHOLDER(): ${session}")
+        Log.d(TAG, "CURRENT SESSION BEING FORMATTED IN ONBINDVIEWHOLDER(): ${sessionEntry}")
 
-        holder.textViewName.text = session.name
+        holder.textViewName.text = sessionEntry.name
 
         // formats the date nicely to show just the day month and year
-        var unformattedDate = session.date.toString()
-        var dayAndMonth = ""
-        var dayAndMonthEndIndex = 0
-        var year = ""
-        for (i in 0..unformattedDate.length){
-            if(dayAndMonthEndIndex == 0 && unformattedDate[i] == ':') {
-                dayAndMonth = unformattedDate.substring(0,i-3)
-                dayAndMonthEndIndex = i
-            }
-            if(
-                i > dayAndMonthEndIndex
-                && unformattedDate[i].isUpperCase()
-                && unformattedDate[i+1] == ' ') {
-                year = unformattedDate.substring(i + 2, unformattedDate.length)
-                break
-            }
-        }
-        holder.textViewDate.text = "[" + dayAndMonth + ", " + year + "]"
+//        val unformattedDate = sessionEntry.date.toString()
+//        var dayAndMonth = ""
+//        var dayAndMonthEndIndex = 0
+//        var year = ""
+//        for (i in 0..unformattedDate.length){
+//            if(dayAndMonthEndIndex == 0 && unformattedDate[i] == ':') {
+//                dayAndMonth = unformattedDate.substring(0,i-3)
+//                dayAndMonthEndIndex = i
+//            }
+//            if(
+//                i > dayAndMonthEndIndex
+//                && unformattedDate[i].isUpperCase()
+//                && unformattedDate[i+1] == ' ') {
+//                year = unformattedDate.substring(i + 2, unformattedDate.length)
+//                break
+//            }
+//        }
+//        holder.textViewDate.text = "[" + dayAndMonth + ", " + year + "]"
 
+        val format: DateFormat = SimpleDateFormat("MM-dd-yyyy", Locale.US)
+        holder.textViewDate.text  = format.format(sessionEntry.date)
         // formats the time to show it in hours and minutes
-        var elapsedHrs = session.elapsedTime / 60
-        var elapsedSec = session.elapsedTime % 60
+        val elapsedHrs = sessionEntry.elapsedTime / 60
+        val elapsedSec = sessionEntry.elapsedTime % 60
         holder.textViewTimeSpent.text = "[" + elapsedHrs + "h " + elapsedSec + "min]"
 
         // formats the heartbeat nicely for it to display like "79 BPM"
-        holder.textViewHeartrate.text = session.heartRate.toString() + " BPM"
+        holder.textViewHeartrate.text = sessionEntry.heartRate.toString() + " BPM"
 
         //displays the emoji
         holder.textViewEmotion.text = try {
-            Session.EMOTION.valueOf(session.emotion).emoji
+            Session.EMOTION.valueOf(sessionEntry.emotion).emoji
         } catch (ex: IllegalArgumentException) {
             "¯\\_(ツ)_/¯"
         }
@@ -119,13 +123,15 @@ class SessionAdapter(var sessionList: MutableList<Session>) : RecyclerView.Adapt
 
         holder.layout.setOnClickListener {
             Log.d(TAG, "layout.setOnClickListener()")
-            val intent = Intent(context, Session::class.java)
+            val intent = Intent(context, SessionDetailActivity::class.java)
             // add the hero to the extras of the intent
             Toast.makeText(context, "SessionAdapter activatedddd", Toast.LENGTH_SHORT).show()
 
 
-            intent.putExtra(EXTRA_SESSION, "session")
+            intent.putExtra(EXTRA_SESSION_ENTRY, sessionEntry)
+            Log.d(TAG, "EXTRA_SESSION intent put!!!")
             context.startActivity(intent)
+            Log.d(TAG, "starting SessionDetailActivity!!!")
 
         }
     }

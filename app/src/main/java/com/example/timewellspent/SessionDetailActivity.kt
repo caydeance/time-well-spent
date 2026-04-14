@@ -1,5 +1,6 @@
 package com.example.timewellspent
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.ArrayAdapter
@@ -24,7 +25,6 @@ class SessionDetailActivity : AppCompatActivity() {
 
     companion object {
         val TAG = "SessionDetailActivity"
-        val EXTRA_SESSION_ENTRY = "session entry"
     }
 
     private lateinit var binding: ActivitySessionDetailBinding
@@ -40,13 +40,22 @@ class SessionDetailActivity : AppCompatActivity() {
             insets
         }
 
-        val sessionEntry = intent.getParcelableExtra<Session>(EXTRA_SESSION_ENTRY) ?: Session()
+        Log.d(SessionAdapter.Companion.TAG, "reached SessionDetailActivity!!!")
+        val sessionEntry = intent.getParcelableExtra<Session>(SessionAdapter.EXTRA_SESSION_ENTRY) ?: Session()
+        Log.d(SessionAdapter.Companion.TAG, "intent received in SessionDetailActivity!!!")
+
+//        val sessionEntry = intent.getParcelableExtra<Session>(EXTRA_SESSION_ENTRY) ?: Session()
+
 
         binding.editTextSessionDetailName.setText(sessionEntry.name)
+        Log.d(SessionAdapter.Companion.TAG, "name edited to: ${sessionEntry.name}")
         binding.editTextSessionDetailHeartRate.setText("${sessionEntry.heartRate}")
+        Log.d(SessionAdapter.Companion.TAG, "heartRate edited to: ${sessionEntry.heartRate}")
         binding.sliderSessionDetailTimeSpent.value = sessionEntry.elapsedTime.toFloat()
+        Log.d(SessionAdapter.Companion.TAG, "elapsedTime edited to: ${sessionEntry.elapsedTime}")
         val format: DateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
         binding.textViewSessionDetailDate.text = format.format(sessionEntry.date)
+        Log.d(SessionAdapter.Companion.TAG, "date edited to: ${sessionEntry.date}")
 
         var spinnerItems = Session.EMOTION.entries.map { it.emoji }
         var emotions = Session.EMOTION.entries.map { it.name }
@@ -80,6 +89,7 @@ class SessionDetailActivity : AppCompatActivity() {
 
             Backendless.UserService.CurrentUser(true, object : AsyncCallback<BackendlessUser?> {
                 override fun handleResponse(response: BackendlessUser?) {
+                    Log.d(TAG, "SAVE BUTTON cLIcKED, reponse is: ${response}")
                     if(response != null) {
                         // some additional logic for reloaded user
                         sessionEntry.ownerId = response.userId
@@ -94,6 +104,7 @@ class SessionDetailActivity : AppCompatActivity() {
                                 ?: Date()
                         sessionEntry.emotion =
                             Session.EMOTION.entries.find { it.emoji == binding.spinnerSessionDetailEmotion.selectedItem.toString() }!!.name
+
                         saveToBackendless(sessionEntry)
                     }
                 }
@@ -110,8 +121,30 @@ class SessionDetailActivity : AppCompatActivity() {
 
     }
 
-    private fun saveToBackendless(gameEntry: Session) {
+    private fun saveToBackendless(sessionEntry: Session) {
         // code here to save to backendless
+        Log.d(TAG, "saveToBackendless()")
+        Log.d(TAG, "SAVING SEsSION: ${sessionEntry}")
+
+        if(intent.hasExtra(SessionAdapter.EXTRA_SESSION_ENTRY)) {
+            
+        }
+        else {
+            Backendless.Data.of<Session>(Session::class.java)
+                .save(sessionEntry, object : AsyncCallback<Session> {
+                    override fun handleResponse(response: Session) {
+                        // new Contact instance has been saved
+                        val context =
+                        val sessionListIntent = Intent(context, SessionListActivity::class.java)
+                        startActivity(sessionListIntent)
+                    }
+
+                    override fun handleFault(fault: BackendlessFault?) {
+                        // an error has occurred, the error code can be retrieved with fault.getCode()
+                        Log.d(TAG, "handleFault: ${fault?.message}")
+                    }
+                })
+        }
     }
 
 
